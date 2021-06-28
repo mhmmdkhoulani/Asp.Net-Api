@@ -70,6 +70,7 @@ namespace AspCoreDemo.Api
             services.AddScoped<IUserService, UserService>();
             services.AddTransient<IMailService, SendInBlueMailService>();
 
+            services.AddRazorPages();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -99,6 +100,7 @@ namespace AspCoreDemo.Api
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });
         }

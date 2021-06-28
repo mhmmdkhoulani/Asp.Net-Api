@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspCoreDemo.Api", "AspCoreDemo.Api\AspCoreDemo.Api.csproj", "{DC73DC2B-2969-4D2F-BB0B-5DE3EB92F09E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspCoreDemo.Api", "AspCoreDemo.Api\AspCoreDemo.Api.csproj", "{DC73DC2B-2969-4D2F-BB0B-5DE3EB92F09E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspCoreDemo.Shared", "AspCoreDemo.Shared\AspCoreDemo.Shared.csproj", "{AE95561D-BBEB-4722-A020-B98F6C535FEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspCoreDemo.Shared", "AspCoreDemo.Shared\AspCoreDemo.Shared.csproj", "{AE95561D-BBEB-4722-A020-B98F6C535FEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

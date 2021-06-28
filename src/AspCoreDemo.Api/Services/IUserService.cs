@@ -1,4 +1,5 @@
-﻿using AspCoreDemo.Shared;
+﻿using AspCoreDemo.Api.Models;
+using AspCoreDemo.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,8 @@ namespace AspCoreDemo.Api.Services
         Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model);
         Task<UserManagerResponse> LoginUserAsync(LoginViewModel model);
         Task<UserManagerResponse> ConfirmEmailAsync(string userId, string token);
+        Task<UserManagerResponse> ForgetPasswordAsync(string email);
+        Task<UserManagerResponse> ResetPasswordAsync(ResetPasswordViewModel model);
 
     }
 
@@ -172,10 +175,79 @@ namespace AspCoreDemo.Api.Services
             };
 
         }
-            
 
-        
-        
+        public async Task<UserManagerResponse> ForgetPasswordAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return new UserManagerResponse
+                {
+                    Message = "User not found",
+                    IsSuccess = false
+                };
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var encodedForgerPasswordToken = Encoding.UTF8.GetBytes(token);
+            var validForgerPasswordToken = WebEncoders.Base64UrlEncode(encodedForgerPasswordToken);
+
+            string url = $"{_configration["AppUrl"]}/resetpassword?email={email}&token={validForgerPasswordToken}";
+
+            await _mailService.SendEmailAsync(email, "Reset Password", "<h1>Welcome to Demo</h1>" +
+                   $"<p>You can reset your password by <a href='{url}'>Clicking here</a></p>");
+
+            return new UserManagerResponse
+            {
+                IsSuccess = true,
+                Message = "Resetn password url has been set to the email successfully",
+            };
+        }
+
+        public async Task<UserManagerResponse> ResetPasswordAsync(ResetPasswordViewModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                return new UserManagerResponse
+                {
+                    Message = "User not found",
+                    IsSuccess = false
+                };
+            }
+
+            if (model.NewPassword != model.ConfirmPassword) 
+            {
+                return new UserManagerResponse
+                {
+                    Message = "Confirm password does not match the password",
+                    IsSuccess = false
+                };
+            }
+            var decodedToken = WebEncoders.Base64UrlDecode(model.Token);
+            string normalToken = Encoding.UTF8.GetString(decodedToken);
+            var result = await _userManager.ResetPasswordAsync(user, normalToken, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return new UserManagerResponse
+                {
+                    IsSuccess = true,
+                    Message = "your password has been reset",
+                };
+            }
+            return new UserManagerResponse
+            {
+                Message = "Somthing went wrong",
+                IsSuccess = false,
+                Errors = result.Errors.Select(e => e.Description)
+            };
+        }
+
+
     }
 }
 

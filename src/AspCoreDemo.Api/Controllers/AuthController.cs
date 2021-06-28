@@ -1,4 +1,5 @@
-﻿using AspCoreDemo.Api.Services;
+﻿using AspCoreDemo.Api.Models;
+using AspCoreDemo.Api.Services;
 using AspCoreDemo.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -81,5 +82,39 @@ namespace AspCoreDemo.Api.Controllers
             }
             return BadRequest(result);
         }
+
+        // /api/auth/forgerpassword
+        [HttpPost("forgetpassword")] 
+        public async Task<IActionResult> ForgetPassword(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return NotFound();
+            }
+
+            var result = await _userService.ForgetPasswordAsync(email);
+
+            if (result.IsSuccess) 
+            {
+                return Ok(result);
+            }
+            return BadRequest();
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _userService.ResetPasswordAsync(model);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            return BadRequest("Some properties are not valid");
+        }
+
     }
 }
