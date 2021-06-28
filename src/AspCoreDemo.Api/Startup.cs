@@ -68,6 +68,7 @@ namespace AspCoreDemo.Api
 
 
             services.AddScoped<IUserService, UserService>();
+            services.AddTransient<IMailService, SendInBlueMailService>();
 
 
             services.AddControllers();

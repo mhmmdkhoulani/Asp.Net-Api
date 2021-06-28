@@ -14,10 +14,12 @@ namespace AspCoreDemo.Api.Controllers
     public class AuthController : ControllerBase
     {
         private IUserService _userService;
+        private IMailService _mailService;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IMailService mailService)
         {
             _userService = userService;
+            _mailService = mailService;
         }
 
         // /api/auth/register
@@ -50,6 +52,7 @@ namespace AspCoreDemo.Api.Controllers
                 var resutl = await _userService.LoginUserAsync(model);
                 if (resutl.IsSuccess)
                 {
+                    await _mailService.SendEmailAsync(model.Email, "test email", "<h1>Everything is working fine now</h1>");
                     return Ok(resutl);
                 }
                 return BadRequest(resutl);
