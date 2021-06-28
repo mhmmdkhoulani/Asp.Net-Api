@@ -1,5 +1,6 @@
 ﻿using AspCoreDemo.Shared;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -17,6 +18,7 @@ namespace AspCoreDemo.Api.Services
 
         Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model);
         Task<UserManagerResponse> LoginUserAsync(LoginViewModel model);
+        Task<UserManagerResponse> ConfirmEmailAsync(string userId, string token);
 
     }
 
@@ -24,13 +26,15 @@ namespace AspCoreDemo.Api.Services
     {
         private UserManager<IdentityUser> _userManager;
         private IConfiguration _configration;
+        private IMailService _mailService;
 
        
 
-        public UserService(UserManager<IdentityUser> userManager, IConfiguration configration)
+        public UserService(UserManager<IdentityUser> userManager, IConfiguration configration, IMailService mailService)
         {
             _userManager = userManager;
             _configration = configration;
+            _mailService = mailService;
         }
 
         
@@ -61,6 +65,17 @@ namespace AspCoreDemo.Api.Services
 
             if (result.Succeeded)
             {
+
+
+                var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(IdentityUser);
+                var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+                var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+
+                string url = $"{_configration["AppUrl"]}/api/auth/confirmEmail?userId={IdentityUser.Id}&token={validEmailToken}";
+
+                await _mailService.SendEmailAsync(IdentityUser.Email, "Email Confirmation", "<h1>Welcome to Demo</h1>" +
+                    $"<p>Please confirm your email by <a href='{url}'>Clicking here</a></p>");
+
                 return new UserManagerResponse
                 {
                     Message = "User created successfully",
@@ -122,6 +137,45 @@ namespace AspCoreDemo.Api.Services
                 ExpireDate = token.ValidTo
             };
         }
+
+        public async Task<UserManagerResponse> ConfirmEmailAsync(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return new UserManagerResponse
+                {
+                    Message = "user not found",
+                    IsSuccess = false
+                };
+            }
+
+            var decodedToken = WebEncoders.Base64UrlDecode(token);
+            string normalToken = Encoding.UTF8.GetString(decodedToken);
+
+            var result = await _userManager.ConfirmEmailAsync(user, normalToken);
+
+            if (result.Succeeded)
+            {
+                return new UserManagerResponse
+                {
+                    Message = " Email Confirmed successfully",
+                    IsSuccess = true
+                };
+            }
+
+            return new UserManagerResponse
+            {
+                Message = "Email did not confirm",
+                IsSuccess = false,
+                Errors = result.Errors.Select(e => e.Description)
+            };
+
+        }
+            
+
+        
+        
     }
 }
 
