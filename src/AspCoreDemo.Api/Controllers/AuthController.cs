@@ -20,6 +20,7 @@ namespace AspCoreDemo.Api.Controllers
             _userService = userService;
         }
 
+        // /api/auth/register
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterAsync([FromBody]RegisterViewModel model)
         {
@@ -36,5 +37,26 @@ namespace AspCoreDemo.Api.Controllers
 
             return BadRequest("Some properties are not valid");// return code 400
         }
+
+
+        // /api/auth/login
+        [HttpPost("Login")]
+        
+        public async Task<IActionResult> LoginAsync([FromBody]LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+                var resutl = await _userService.LoginUserAsync(model);
+                if (resutl.IsSuccess)
+                {
+                    return Ok(resutl);
+                }
+                return BadRequest(resutl);
+            }
+
+            return BadRequest("Some properties are not valid");
+        }
+
     }
 }

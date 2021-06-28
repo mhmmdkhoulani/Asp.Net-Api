@@ -58,10 +58,10 @@ namespace AspCoreDemo.Api
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = "http://mohammad.net",
-                    ValidIssuer = "http://mohammad.net",
+                    ValidAudience = Configuration["AuthSettings: Audience"],
+                    ValidIssuer = Configuration["AuthSettings: Issuer"],
                     RequireExpirationTime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("This is the key that we will use in the encryption")),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AuthSettings:Key"])),
                     ValidateIssuerSigningKey = true
                 };
             });
@@ -91,6 +91,8 @@ namespace AspCoreDemo.Api
 
             app.UseRouting();
 
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
